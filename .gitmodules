@@ -1,0 +1,6 @@
+[submodule "libs/lua"]
+	path = libs/lua
+	url = https://github.com/waizui/lua.git
+[submodule "libs/glfw"]
+	path = libs/glfw
+	url = https://github.com/waizui/glfw.git
