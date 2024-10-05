@@ -36,14 +36,16 @@ static void render_triangle(GLFWwindow* const window) {
 
     // set shader
     const char* vertexShaderSource =
-        "#version 330 core\n"
-        "layout (location = 0) in vec3 aPos;\n"
-        "out vec4 verColor;\n"
-        "void main()\n"
-        "{\n"
-        "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-        "   verColor = gl_Position;\n"
-        "}\0";
+        R"(
+        #version 330 core
+        layout (location = 0) in vec3 aPos;
+        out vec4 verColor;
+        void main()
+        {
+           gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+           verColor = gl_Position;
+        }
+        )";
 
     unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
@@ -51,14 +53,16 @@ static void render_triangle(GLFWwindow* const window) {
     // TODO: check status
 
     const char* fragmentShaderSource =
-        "#version 330 core\n"
-        "out vec4 FragColor;\n"
-        "in vec4 verColor;\n"
-        "void main()\n"
-        "{\n"
-        // "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-        "   FragColor = verColor;\n"
-        "}\n";
+        R"(
+        #version 330 core
+        out vec4 FragColor;
+        in vec4 verColor;
+        void main()
+        {
+        //  FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+           FragColor = verColor;
+        }
+        )";
 
     unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
