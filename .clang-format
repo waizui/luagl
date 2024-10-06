@@ -20,8 +20,8 @@ BraceWrapping:
   BeforeElse: true
 
 # C++11 brace-initializer indentation
-IndentPPDirectives: BeforeHash
-AllowShortFunctionsOnASingleLine: All
+# IndentPPDirectives: BeforeHash
+AllowShortFunctionsOnASingleLine: false
 
 # Control statements
 AllowShortIfStatementsOnASingleLine: false
