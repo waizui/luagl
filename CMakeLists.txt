@@ -31,6 +31,7 @@ set(SOURCES
     src/luagl.cpp
     src/luagl_init.cpp
     src/luagl_shader.cpp
+    src/luagl_render.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES})

@@ -1,8 +1,11 @@
 #include <glad/glad.h>  // need load glad firstly then glfw
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <vector>
 #include <stdlib.h>
 #include "luagl_init.h"
+#include "luagl_render.h"
+#include "luagl_shader.h"
 
 extern "C" {
 #include <lua.h>
@@ -10,84 +13,92 @@ extern "C" {
 #include <lualib.h>
 }
 
-namespace Luagl::Init {
+namespace Luagl {
 
 static void error_exist() {
-    std::cout << "error init opengl";
-    glfwTerminate();
-    abort();
+  std::cout << "error init opengl";
+  glfwTerminate();
+  abort();
 }
 
 static void error_callback(int error, const char* description) {
-    std::cout << "Error: " << description;
-    error_exist();
+  std::cout << "Error: " << description;
+  error_exist();
 }
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action,
                          int mods) {
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-        glfwSetWindowShouldClose(window, GLFW_TRUE);
-    }
+  if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+    glfwSetWindowShouldClose(window, GLFW_TRUE);
+  }
 }
 
 static void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
-    glViewport(0, 0, width, height);
+  glViewport(0, 0, width, height);
 }
 
 static void render_triangle(GLFWwindow* const window) {
 }
 
 void InitGL() {
-    glfwSetErrorCallback(error_callback);
-    if (!glfwInit()) {
-        error_exist();
-    }
+  glfwSetErrorCallback(error_callback);
+  if (!glfwInit()) {
+    error_exist();
+  }
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 }
 
 GLFWwindow* InitWindow(int width, int height) {
-    auto win = glfwCreateWindow(width, height, "luagl", nullptr, nullptr);
-    if (!win) {
-        error_exist();
-    }
+  auto win = glfwCreateWindow(width, height, "luagl", nullptr, nullptr);
+  if (!win) {
+    error_exist();
+  }
 
-    glfwMakeContextCurrent(win);
-    glfwSetKeyCallback(win, key_callback);
+  glfwMakeContextCurrent(win);
+  glfwSetKeyCallback(win, key_callback);
 
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        error_exist();
-    }
+  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+    error_exist();
+  }
 
-    glViewport(0, 0, width, height);
-    glfwSetFramebufferSizeCallback(win, framebuffer_size_callback);
-    return win;
+  glViewport(0, 0, width, height);
+  glfwSetFramebufferSizeCallback(win, framebuffer_size_callback);
+  return win;
+}
+
+Renderer& Window::GetRenderer() {
+  return m_renderer;
 }
 
 void Window::OnUpdate() {
-    // render_triangle(window);
+  // render_triangle(window);
 }
 
-void Draw(Window* win, GLFWwindow* glwin) {
-    // clang-format off
-    float vertices[] = {
-         0.5f,  0.5f, 0.0f,  // top right
-         0.5f, -0.5f, 0.0f,  // bottom right
-        -0.5f, -0.5f, 0.0f,  // bottom left
-        -0.5f,  0.5f, 0.0f   // top left 
-    };
+void Update(Window* win, GLFWwindow* glwin) {
+  while (!glfwWindowShouldClose(glwin)) {
+    win->OnUpdate();
+    win->GetRenderer().Draw();
 
-    unsigned int indices[] = {  // note that we start from 0!
-        0, 1, 3,   // first triangle
-        1, 2, 3    // second triangle
-    };
-    // clang-format on
+    glfwSwapBuffers(glwin);
+    glfwPollEvents();
+  }
+}
 
-    // set shader
-    const char* vertexShaderSource =
-        R"(
+void Window::Show() {
+  InitGL();
+  auto win = InitWindow(m_width, m_height);
+  Update(this, win);
+  glfwDestroyWindow(win);
+  glfwTerminate();
+}
+
+static const Shader* exampleshader() {
+  // set shader
+  const char* vertexShaderSource =
+      R"(
         #version 330 core
         layout (location = 0) in vec3 aPos;
         // layout (location = 1) in vec3 aColor; //define this in VAO pointer
@@ -99,13 +110,8 @@ void Draw(Window* win, GLFWwindow* glwin) {
         }
         )";
 
-    unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-    glCompileShader(vertexShader);
-    // TODO: check status
-
-    const char* fragmentShaderSource =
-        R"(
+  const char* fragmentShaderSource =
+      R"(
         #version 330 core
         out vec4 FragColor;
         in vec4 verColor;
@@ -116,95 +122,37 @@ void Draw(Window* win, GLFWwindow* glwin) {
         }
         )";
 
-    unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-    glCompileShader(fragmentShader);
-
-    // A shader program object is the final linked version of multiple shaders combined.
-    unsigned int shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-    glUseProgram(shaderProgram);
-    // delete linked shader
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-
-    // set VAO
-    unsigned int VAO;
-    glGenVertexArrays(1, &VAO);
-
-    glBindVertexArray(VAO);
-    // set VBO
-    unsigned int VBO;
-    // can gen 2 buffers, one is VBO, one is EBO
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    // position:0, elements:3, type:GL_FLOAT,normalize:GL_FALSE,size:3*sizeof,start
-    // offset:nullptr , set VAO properties
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
-    // 0:position as it's argument apply to last VAO
-    glEnableVertexAttribArray(0);
-
-    // EBO bind to VAO is activated
-    unsigned int EBO;
-    glGenBuffers(1, &EBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    while (!glfwWindowShouldClose(glwin)) {
-        win->OnUpdate();
-
-        glClearColor(0.2, 0.5, 0.3, 1);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        glUseProgram(shaderProgram);
-
-        // draw last binded VAO
-        // glDrawArrays(GL_TRIANGLES, 0, 3);
-
-        // use EBO to draw
-        // mode, count, type, offset
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-        glfwSwapBuffers(glwin);
-        glfwPollEvents();
-    }
-
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
-    glDeleteProgram(shaderProgram);
-}
-
-void Update(Window* win, GLFWwindow* glwin) {
-    Draw(win, glwin);
-}
-
-void Window::Show() {
-    InitGL();
-    auto win = InitWindow(m_width, m_height);
-    Update(this, win);
-    glfwDestroyWindow(win);
-    glfwTerminate();
-}
-
-Window::~Window() {
+  return std::move(new Shader(vertexShaderSource, fragmentShaderSource));
 }
 
 static int LuaTestgl(lua_State* L) {
-    auto win = Window(640, 480);
-    win.Show();
-    return 0;
+  // clang-format off
+    const std::vector<float> vertices = {
+         0.5f,  0.5f, 0.0f,  // top right
+         0.5f, -0.5f, 0.0f,  // bottom right
+        -0.5f, -0.5f, 0.0f,  // bottom left
+        -0.5f,  0.5f, 0.0f   // top left
+    };
+
+    const std::vector<int> indices = {  // note that we start from 0!
+        0, 1, 3,   // first triangle
+        1, 2, 3    // second triangle
+    };
+  // clang-format on
+  auto win = Window(640, 480);
+  const Shader* s = exampleshader();
+  auto ctx = RenderContext(s, vertices, indices);
+  win.GetRenderer().Add(ctx);
+  win.Show();
+  return 0;
 }
 
+// lib functions
 static const luaL_Reg funcs[] = {{"testgl", LuaTestgl}, {NULL, NULL}};
 
 int OpenInit(lua_State* L) {
-    luaL_newlib(L, funcs);  // new table with functions
-    return 1;
+  luaL_newlib(L, funcs);  // new table with functions
+  return 1;
 }
 
-}  // namespace Luagl::Init
+}  // namespace Luagl
