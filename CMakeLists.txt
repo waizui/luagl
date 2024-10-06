@@ -29,6 +29,8 @@ target_include_directories(${LUA_LIB} PUBLIC libs/lua)
 set(SOURCES
     src/main.cpp 
     src/luagl.cpp
+    src/luagl_init.cpp
+    src/luagl_shader.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES})
