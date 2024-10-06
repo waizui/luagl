@@ -122,7 +122,7 @@ static const Shader* exampleshader() {
         }
         )";
 
-  return std::move(new Shader(vertexShaderSource, fragmentShaderSource));
+  return new Shader(vertexShaderSource, fragmentShaderSource);
 }
 
 static int LuaTestgl(lua_State* L) {

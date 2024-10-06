@@ -1,23 +1,25 @@
 #include <glad/glad.h>  // need load glad firstly then glfw
 #include <GLFW/glfw3.h>
-#include <cassert>
-#include <memory>
 #include <vector>
+#include <iostream>
 #include "luagl_render.h"
 
 namespace Luagl {
+
 
 RenderContext::RenderContext(const Shader* shader, const std::vector<float>& vertices,
                              const std::vector<int>& indices)
     : m_shader(shader), m_vertices(vertices), m_indices(indices) {
   // can gen 2 buffers, one is VBO, one is EBO
+  std::cout << "gl1";
+  glGenVertexArrays(1, &this->m_VAO);
+  glBindVertexArray(this->m_VAO);
+
   glGenBuffers(1, &m_VBO);
   glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
   int vbosz = vertices.size() * sizeof(float);
   glBufferData(GL_ARRAY_BUFFER, vbosz, vertices.data(), GL_STATIC_DRAW);
 
-  glGenVertexArrays(1, &this->m_VAO);
-  glBindVertexArray(this->m_VAO);
   // position:0, elements:3, type:GL_FLOAT,normalize:GL_FALSE,size:3*sizeof,start
   // offset:nullptr , set VAO properties
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
@@ -27,7 +29,7 @@ RenderContext::RenderContext(const Shader* shader, const std::vector<float>& ver
   // EBO bind to VAO is activated
   glGenBuffers(1, &m_EBO);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
-  int ebosz = indices.size() * sizeof(float);
+  int ebosz = indices.size() * sizeof(int);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, ebosz, indices.data(), GL_STATIC_DRAW);
 }
 

@@ -42,10 +42,4 @@ Shader::Shader(const char* vert, const char* frag) {
   this->Compile(vert, frag);
 }
 
-Shader::~Shader() {
-  if (m_program) {
-    glDeleteProgram(m_program);
-  }
-}
-
 }  // namespace Luagl
