@@ -2,12 +2,12 @@
 
 extern "C" {
 #include <lua.h>
-#include <lauxlib.h>
-#include <lualib.h>
 }
 
 namespace Luagl {
 
 void Testgl();
+
+void OpenLib(lua_State* L);
 
 }  // namespace Luagl

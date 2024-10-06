@@ -2,7 +2,14 @@
 #include <glad/glad.h>  // need load glad firstly then glfw
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include "lstate.h"
 #include <stdlib.h>
+
+extern "C" {
+#include <lua.h>
+#include <lauxlib.h>
+#include <lualib.h>
+}
 
 namespace Luagl {
 
@@ -169,6 +176,22 @@ void Testgl() {
     glfwDestroyWindow(window);
     glfwTerminate();
     std::cout << "luagl terminate";
+}
+
+static int LuaTestgl(lua_State* L) {
+    Testgl();
+    return 0;
+}
+
+static const luaL_Reg mylib_funcs[] = {{"testgl", LuaTestgl}, {NULL, NULL}};
+
+int luaopen_mylib(lua_State* L) {
+    luaL_newlib(L, mylib_funcs);
+    return 1;
+}
+
+void OpenLib(lua_State* L) {
+    luaL_requiref(L, "luagl", luaopen_mylib, 0);
 }
 
 }  // namespace Luagl
