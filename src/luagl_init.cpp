@@ -66,6 +66,11 @@ GLFWwindow* InitWindow(int width, int height) {
   return win;
 }
 
+Window::Window(int width, int height) : m_width(width), m_height(height) {
+  InitGL();
+  glwin = InitWindow(m_width, m_height);
+}
+
 Renderer& Window::GetRenderer() {
   return m_renderer;
 }
@@ -85,10 +90,11 @@ void Update(Window* win, GLFWwindow* glwin) {
 }
 
 void Window::Show() {
-  InitGL();
-  auto win = InitWindow(m_width, m_height);
-  Update(this, win);
-  glfwDestroyWindow(win);
+  Update(this, glwin);
+}
+
+Window::~Window() {
+  glfwDestroyWindow(glwin);
   glfwTerminate();
 }
 

@@ -1,6 +1,5 @@
 #include <glad/glad.h>  // need load glad firstly then glfw
 #include <GLFW/glfw3.h>
-#include <utility>
 #include "luagl_shader.h"
 
 namespace Luagl {
