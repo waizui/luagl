@@ -1,5 +1,6 @@
 #include <glad/glad.h>  // need load glad firstly then glfw
 #include <GLFW/glfw3.h>
+#include <iostream>
 #include "luagl_shader.h"
 
 namespace Luagl {
@@ -16,11 +17,25 @@ void Shader::Compile(const char* vert, const char* frag) {
   unsigned int vertid = glCreateShader(GL_VERTEX_SHADER);
   glShaderSource(vertid, 1, &vert, NULL);
   glCompileShader(vertid);
-  // TODO: check status
+
+  int success;
+  char infoLog[512];
+
+  glGetShaderiv(vertid, GL_COMPILE_STATUS, &success);
+  if (!success) {
+    glGetShaderInfoLog(vertid, 512, NULL, infoLog);
+    std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+  }
 
   unsigned int fragid = glCreateShader(GL_FRAGMENT_SHADER);
   glShaderSource(fragid, 1, &frag, NULL);
   glCompileShader(fragid);
+
+  glGetShaderiv(fragid, GL_COMPILE_STATUS, &success);
+  if (!success) {
+    glGetShaderInfoLog(fragid, 512, NULL, infoLog);
+    std::cout << "ERROR::SHADER::FRAG::COMPILATION_FAILED\n" << infoLog << std::endl;
+  }
 
   unsigned int prog = glCreateProgram();
   glAttachShader(prog, vertid);
