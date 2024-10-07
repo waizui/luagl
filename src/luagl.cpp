@@ -21,8 +21,7 @@ static void PreLoad(lua_State* L, const char* name, lua_CFunction loader) {
 }
 
 void OpenLib(lua_State* L) {
-  PreLoad(L, "luaglinit", Luagl::OpenInit);
-  // PreLoad(L, "luaglshader", Luagl::Shader::OpenShader);
+  PreLoad(L, "luagl", Luagl::OpenInit);
 }
 
 }  // namespace Luagl

@@ -46,6 +46,10 @@ void InitGL() {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+#ifdef __APPLE__
+  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
 }
 
 GLFWwindow* InitWindow(int width, int height) {
@@ -55,14 +59,13 @@ GLFWwindow* InitWindow(int width, int height) {
   }
 
   glfwMakeContextCurrent(win);
-  glfwSetKeyCallback(win, key_callback);
+  // glfwSetKeyCallback(win, key_callback);
+  glfwSetFramebufferSizeCallback(win, framebuffer_size_callback);
 
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
     error_exist();
   }
 
-  glViewport(0, 0, width, height);
-  glfwSetFramebufferSizeCallback(win, framebuffer_size_callback);
   return win;
 }
 
@@ -90,6 +93,7 @@ void Update(Window* win, GLFWwindow* glwin) {
 }
 
 void Window::Show() {
+  glViewport(0, 0, m_width, m_height);
   Update(this, glwin);
 }
 
@@ -98,60 +102,80 @@ Window::~Window() {
   glfwTerminate();
 }
 
-static const Shader* exampleshader() {
-  // set shader
-  const char* vertexShaderSource =
-      R"(
-        #version 330 core
-        layout (location = 0) in vec3 aPos;
-        // layout (location = 1) in vec3 aColor; //define this in VAO pointer
-        out vec4 verColor;
-        void main()
-        {
-           gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
-           verColor = gl_Position;
-        }
-        )";
-
-  const char* fragmentShaderSource =
-      R"(
-        #version 330 core
-        out vec4 FragColor;
-        in vec4 verColor;
-        void main()
-        {
-        //  FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
-           FragColor = verColor;
-        }
-        )";
-
-  return new Shader(vertexShaderSource, fragmentShaderSource);
+int NewShader(lua_State* L) {
+  auto vert = luaL_checkstring(L, 1);
+  auto frag = luaL_checkstring(L, 2);
+  auto shader = new Shader(vert, frag);
+  auto udata = (Shader**)lua_newuserdata(L, sizeof(Shader*));
+  *udata = shader;
+  return 1;
 }
 
-static int LuaTestgl(lua_State* L) {
-  // clang-format off
-    const std::vector<float> vertices = {
-         0.5f,  0.5f, 0.0f,  // top right
-         0.5f, -0.5f, 0.0f,  // bottom right
-        -0.5f, -0.5f, 0.0f,  // bottom left
-        -0.5f,  0.5f, 0.0f   // top left
-    };
+int NewWindow(lua_State* L) {
+  auto w = luaL_checknumber(L, 1);
+  auto h = luaL_checknumber(L, 2);
+  auto udata = (Window**)lua_newuserdata(L, sizeof(Window*));
+  *udata = new Window(w, h);
+  return 1;
+}
 
-    const std::vector<int> indices = {  // note that we start from 0!
-        0, 1, 3,   // first triangle
-        1, 2, 3    // second triangle
-    };
-  // clang-format on
-  auto win = Window(640, 480);
-  const Shader* s = exampleshader();
-  auto ctx = new RenderContext(s, vertices, indices);
-  win.GetRenderer().Add(ctx);
-  win.Show();
+int NewRenderContext(lua_State* L) {
+  auto shader = (*(Shader**)lua_touserdata(L, 1));
+  auto nvert = lua_rawlen(L, 2);
+  auto nindices = lua_rawlen(L, 3);
+
+  auto verticies = new std::vector<float>(nvert);
+  for (int i = 1; i <= nvert; ++i) {
+    lua_rawgeti(L, 2, i);  // Push my_array_table[i] onto the stack
+    if (lua_isnumber(L, -1)) {
+      double value = lua_tonumber(L, -1);  // Get the number
+      verticies->at(i - 1) = value;
+    }
+
+    lua_pop(L, 1);  // Pop the value off the stack after using it
+  }
+
+  auto indices = new std::vector<int>(nindices);
+  for (int i = 1; i <= nindices; ++i) {
+    lua_rawgeti(L, 3, i);
+    if (lua_isinteger(L, -1)) {
+      int value = lua_tointeger(L, -1);
+      indices->at(i - 1) = value;
+    }
+    lua_pop(L, 1);
+  }
+
+  auto rc = new RenderContext(shader, *verticies, *indices);
+  auto udata = (RenderContext**)lua_newuserdata(L, sizeof(RenderContext*));
+  *udata = rc;
+  return 1;
+}
+
+int ShowWindow(lua_State* L) {
+  auto win = *(Window**)lua_touserdata(L, 1);
+  auto rc = *(RenderContext**)lua_touserdata(L, 2);
+  (*win).GetRenderer().Add(rc);
+  (*win).Show();
   return 0;
 }
 
+int DeleteWindow(lua_State* L) {
+  auto win = *(Window**)lua_touserdata(L, 1);
+  delete win;
+  return 0;
+}
+
+// clang-format off
 // lib functions
-static const luaL_Reg funcs[] = {{"testgl", LuaTestgl}, {NULL, NULL}};
+static const luaL_Reg funcs[] = {
+    {"newwindow", NewWindow}, 
+    {"deletewindow", DeleteWindow}, 
+    {"newrendercontext", NewRenderContext}, 
+    {"newshader", NewShader}, 
+    {"showwindow", ShowWindow}, 
+    {NULL, NULL}
+};
+// clang-format on
 
 int OpenInit(lua_State* L) {
   luaL_newlib(L, funcs);  // new table with functions

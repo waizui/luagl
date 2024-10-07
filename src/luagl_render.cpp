@@ -1,14 +1,12 @@
 #include <glad/glad.h>  // need load glad firstly then glfw
 #include <GLFW/glfw3.h>
 #include <vector>
-#include <iostream>
 #include "luagl_render.h"
 
 namespace Luagl {
 
-
-RenderContext::RenderContext(const Shader* shader, const std::vector<float>& vertices,
-                             const std::vector<int>& indices)
+RenderContext::RenderContext(Shader* shader, std::vector<float>& vertices,
+                             std::vector<int>& indices)
     : m_shader(shader), m_vertices(vertices), m_indices(indices) {
   // can gen 2 buffers, one is VBO, one is EBO
   glGenVertexArrays(1, &this->m_VAO);
@@ -63,7 +61,7 @@ void Renderer::Draw() {
 
 Renderer::~Renderer() {
   for (RenderContext* ctx : m_renderctx) {
-    delete ctx;  
+    delete ctx;
   }
 }
 

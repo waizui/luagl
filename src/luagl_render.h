@@ -11,8 +11,8 @@ namespace Luagl {
 
 class RenderContext {
  public:
-  RenderContext(const Shader* shader, const std::vector<float>& vertices,
-                const std::vector<int>& indices);
+  RenderContext(Shader* shader, std::vector<float>& vertices,
+                std::vector<int>& indices);
   void Draw();
   ~RenderContext();
 
