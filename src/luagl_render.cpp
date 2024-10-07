@@ -11,7 +11,6 @@ RenderContext::RenderContext(const Shader* shader, const std::vector<float>& ver
                              const std::vector<int>& indices)
     : m_shader(shader), m_vertices(vertices), m_indices(indices) {
   // can gen 2 buffers, one is VBO, one is EBO
-  std::cout << "gl1";
   glGenVertexArrays(1, &this->m_VAO);
   glBindVertexArray(this->m_VAO);
 

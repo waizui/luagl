@@ -11,6 +11,8 @@ set(CMAKE_C_STANDARD_REQUIRED True)
 # Command.json for nvim, this will not work on Windows unless Ninja is used
 set(CMAKE_EXPORT_COMPILE_COMMANDS True)
 
+set(CMAKE_BUILD_TYPE Debug)
+
 # ------lua--------
 set(LUA_LIB lua_static)
 # find all .c files in the lua/src directory
