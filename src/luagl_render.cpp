@@ -49,12 +49,12 @@ RenderContext::~RenderContext() {
 
 // --------------------renderer
 
-void Renderer::Add(RenderContext& ctx) {
-  m_renderctx.push_back(&ctx);
+void Renderer::Add(RenderContext* ctx) {
+  m_renderctx.push_back(ctx);
 }
 
 void Renderer::Draw() {
-  glClearColor(0, 0, 0, 0);
+  glClearColor(0.2, 0.2, 0.2, 1);
   glClear(GL_COLOR_BUFFER_BIT);
   for (auto ctx : m_renderctx) {
     ctx->Draw();

@@ -27,7 +27,7 @@ class RenderContext {
 
 class Renderer {
  public:
-  void Add(RenderContext& ctx);
+  void Add(RenderContext* ctx);
   void Draw();
   ~Renderer();
 

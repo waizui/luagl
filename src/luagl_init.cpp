@@ -144,7 +144,7 @@ static int LuaTestgl(lua_State* L) {
   // clang-format on
   auto win = Window(640, 480);
   const Shader* s = exampleshader();
-  auto ctx = RenderContext(s, vertices, indices);
+  auto ctx = new RenderContext(s, vertices, indices);
   win.GetRenderer().Add(ctx);
   win.Show();
   return 0;

@@ -4,7 +4,6 @@
 
 namespace Luagl {
 
-
 int Shader::Id() const {
   return m_program;
 }
@@ -34,11 +33,15 @@ void Shader::Compile(const char* vert, const char* frag) {
   glDeleteShader(vertid);
   glDeleteShader(fragid);
 
-  this->m_program = prog;
+  m_program = prog;
 }
 
 Shader::Shader(const char* vert, const char* frag) {
-  this->Compile(vert, frag);
+  Compile(vert, frag);
+}
+
+Shader::~Shader() {
+  glDeleteProgram(m_program);
 }
 
 }  // namespace Luagl
