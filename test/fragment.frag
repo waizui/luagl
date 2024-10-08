@@ -1,20 +1,4 @@
-local gl = require("luagl")
-
-print("starting...")
-
-local vert = [[
-    #version 330 core
-    layout (location = 0) in vec3 aPos;
-    void main()
-    {
-       gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
-    }
-]]
-
-local frag = [[
 #version 330 core
-// see the GLSL 1.2 specification:
-// https://www.khronos.org/registry/OpenGL/specs/gl/GLSLangSpec.1.20.pdf
 
 // signed distance function of a cylinder the axis is aligned to z-direction
 // code from: https://iquilezles.org/articles/distfunctions/
@@ -111,7 +95,7 @@ void main()
   // gl_FragCoord: the coordinate of the pixel
   // left-bottom is (0,0), right-top is (W,H)
   // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/gl_FragCoord.xhtml
-  vec2 scr_xy = gl_FragCoord.xy / vec2(500,500) * 2.0 - vec2(1,1); // canonical screen position [-1,+1] x [-1,+1]
+  vec2 scr_xy = gl_FragCoord.xy / vec2(512,512) * 2.0 - vec2(1,1); // canonical screen position [-1,+1] x [-1,+1]
   vec3 src = frame_x * scr_xy.x + frame_y * scr_xy.y + frame_z * 1;  // source of ray from pixel
   vec3 dir = -frame_z;  // direction of ray (looking at the origin)
 
@@ -137,28 +121,3 @@ void main()
   }
   gl_FragColor = vec4(0.9, 0.9, 1.0, 1); // ray doesn't hit the object
 }
-]]
-
--- stylua: ignore
-local vertices = {
-  1, 1, 0.0,
-  1, -1, 0.0,
-  -1, -1, 0.0,
-  -1, 1, 0.0
-}
-
--- stylua: ignore
-local indices = {
-  0, 1, 3,
-  1, 2, 3
-}
-
--- window need to be initialized first
-local win = gl.Window.new(800, 500)
-
-local shader = gl.Shader.new(vert, frag)
-
-local rc = gl.RenderContext.new(shader, vertices, indices)
-
-win:show(rc)
-win:close()

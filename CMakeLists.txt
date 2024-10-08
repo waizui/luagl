@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 
 project(luagl LANGUAGES C CXX)
 
+set(EXECUTABLE_NAME lua)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
@@ -11,7 +12,7 @@ set(CMAKE_C_STANDARD_REQUIRED True)
 # Command.json for nvim, this will not work on Windows unless Ninja is used
 set(CMAKE_EXPORT_COMPILE_COMMANDS True)
 
-set(CMAKE_BUILD_TYPE Debug)
+#set(CMAKE_BUILD_TYPE Debug)
 
 # ------lua--------
 set(LUA_LIB lua_static)
@@ -36,7 +37,7 @@ set(SOURCES
     src/luagl_render.cpp
 )
 
-add_executable(${PROJECT_NAME} ${SOURCES})
+add_executable(${EXECUTABLE_NAME} ${SOURCES})
 
 # glfw has own cmakelists
 add_subdirectory(libs/glfw)
@@ -49,7 +50,7 @@ add_library(glad STATIC libs/glad/src/glad.c)
 target_include_directories(glad PUBLIC libs/glad/include)
 
 
-target_link_libraries(${PROJECT_NAME} 
+target_link_libraries(${EXECUTABLE_NAME} 
     ${LUA_LIB}
     glfw
     glad                
@@ -57,7 +58,7 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 # Include directories for the target
-target_include_directories(${PROJECT_NAME} 
+target_include_directories(${EXECUTABLE_NAME} 
     PRIVATE ${CMAKE_SOURCE_DIR}/libs/lua
     PRIVATE ${CMAKE_SOURCE_DIR}/include        
     PRIVATE ${CMAKE_SOURCE_DIR}/libs/glfw/include  # GLFW headers
