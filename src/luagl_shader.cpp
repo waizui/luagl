@@ -3,6 +3,12 @@
 #include <iostream>
 #include "luagl_shader.h"
 
+extern "C" {
+#include <lua.h>
+#include <lauxlib.h>
+#include <lualib.h>
+}
+
 namespace Luagl {
 
 int Shader::Id() const {
@@ -42,8 +48,6 @@ void Shader::Compile(const char* vert, const char* frag) {
   glAttachShader(prog, fragid);
   glLinkProgram(prog);
 
-  // glUseProgram(prog);
-
   // delete linked shader
   glDeleteShader(vertid);
   glDeleteShader(fragid);
@@ -57,6 +61,26 @@ Shader::Shader(const char* vert, const char* frag) {
 
 Shader::~Shader() {
   glDeleteProgram(m_program);
+}
+
+int Shader::LuaCall(lua_State* L) {
+  auto key = lua_tostring(L, 2);
+
+  if (strcmp(key, "new") == 0) {
+    auto f = [](lua_State* L) -> int {
+      auto vert = luaL_checkstring(L, 1);
+      auto frag = luaL_checkstring(L, 2);
+      auto shader = new Shader(vert, frag);
+      auto udata = (Shader**)lua_newuserdata(L, sizeof(Shader*));
+      *udata = shader;
+      luaL_setmetatable(L, "luaglShader");
+      return 1;
+    };
+    lua_pushcfunction(L, f);
+    return 1;
+  }
+
+  return 0;
 }
 
 }  // namespace Luagl

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "macros.h"
+
 extern "C" {
 #include <lua.h>
 }
@@ -13,6 +15,7 @@ class Shader {
   Shader(const char* vert, const char* frag);
   int Id() const;
   ~Shader();
+  LUACLASS
 
  private:
   int m_program = 0;

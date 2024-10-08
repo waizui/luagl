@@ -2,6 +2,7 @@
 
 #include <vector>
 #include "luagl_shader.h"
+#include "macros.h"
 
 extern "C" {
 #include <lua.h>
@@ -11,10 +12,10 @@ namespace Luagl {
 
 class RenderContext {
  public:
-  RenderContext(Shader* shader, std::vector<float>& vertices,
-                std::vector<int>& indices);
+  RenderContext(Shader* shader, std::vector<float>& vertices, std::vector<int>& indices);
   void Draw();
   ~RenderContext();
+  LUACLASS
 
  private:
   unsigned int m_VAO;

@@ -3,6 +3,11 @@
 #include <vector>
 #include "luagl_render.h"
 
+extern "C" {
+#include <lua.h>
+#include <lauxlib.h>
+#include <lualib.h>
+}
 namespace Luagl {
 
 RenderContext::RenderContext(Shader* shader, std::vector<float>& vertices,
@@ -43,6 +48,49 @@ RenderContext::~RenderContext() {
   glDeleteVertexArrays(1, &m_VAO);
   glDeleteBuffers(1, &m_VBO);
   glDeleteBuffers(1, &m_EBO);
+}
+
+int RenderContext::LuaCall(lua_State* L) {
+  auto key = lua_tostring(L, 2);
+
+  if (strcmp(key, "new") == 0) {
+    auto f = [](lua_State* L) -> int {
+      auto shader = (*(Shader**)lua_touserdata(L, 1));
+      auto nvert = lua_rawlen(L, 2);
+      auto nindices = lua_rawlen(L, 3);
+
+      auto verticies = new std::vector<float>(nvert);
+      for (int i = 1; i <= nvert; ++i) {
+        lua_rawgeti(L, 2, i);  // Push my_array_table[i] onto the stack
+        if (lua_isnumber(L, -1)) {
+          double value = lua_tonumber(L, -1);  // Get the number
+          verticies->at(i - 1) = value;
+        }
+
+        lua_pop(L, 1);  // Pop the value off the stack after using it
+      }
+
+      auto indices = new std::vector<int>(nindices);
+      for (int i = 1; i <= nindices; ++i) {
+        lua_rawgeti(L, 3, i);
+        if (lua_isinteger(L, -1)) {
+          int value = lua_tointeger(L, -1);
+          indices->at(i - 1) = value;
+        }
+        lua_pop(L, 1);
+      }
+
+      auto rc = new RenderContext(shader, *verticies, *indices);
+      auto udata = (RenderContext**)lua_newuserdata(L, sizeof(RenderContext*));
+      *udata = rc;
+      luaL_setmetatable(L, "luaglRenderContext");
+      return 1;
+    };
+    lua_pushcfunction(L, f);
+    return 1;
+  }
+
+  return 0;
 }
 
 // --------------------renderer

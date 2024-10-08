@@ -1,11 +1,12 @@
 #include <glad/glad.h>  // need load glad firstly then glfw
 #include <GLFW/glfw3.h>
+#include <cstring>
 #include <iostream>
-#include <vector>
+#include <ostream>
 #include <stdlib.h>
+
 #include "luagl_window.h"
 #include "luagl_render.h"
-#include "luagl_shader.h"
 
 extern "C" {
 #include <lua.h>
@@ -79,7 +80,7 @@ Renderer& Window::GetRenderer() {
 }
 
 void Window::OnUpdate() {
-  // render_triangle(window);
+  // TODO: call lua 
 }
 
 void Update(Window* win, GLFWwindow* glwin) {
@@ -102,88 +103,58 @@ Window::~Window() {
   glfwTerminate();
 }
 
-int Window::LuaCall(lua_State *L){
-  std::cout << "not implement in wind";
-  return 0;
-}
-
-int Window::LuaCtor(lua_State *L){
-  auto w = luaL_checknumber(L, 1);
-  auto h = luaL_checknumber(L, 2);
-  auto udata = (Window**)lua_newuserdata(L, sizeof(Window*));
-  *udata = new Window(w, h);
-  return 1;
-};
-
-int NewShader(lua_State* L) {
-  auto vert = luaL_checkstring(L, 1);
-  auto frag = luaL_checkstring(L, 2);
-  auto shader = new Shader(vert, frag);
-  auto udata = (Shader**)lua_newuserdata(L, sizeof(Shader*));
-  *udata = shader;
-  return 1;
-}
-
-int NewRenderContext(lua_State* L) {
-  auto shader = (*(Shader**)lua_touserdata(L, 1));
-  auto nvert = lua_rawlen(L, 2);
-  auto nindices = lua_rawlen(L, 3);
-
-  auto verticies = new std::vector<float>(nvert);
-  for (int i = 1; i <= nvert; ++i) {
-    lua_rawgeti(L, 2, i);  // Push my_array_table[i] onto the stack
-    if (lua_isnumber(L, -1)) {
-      double value = lua_tonumber(L, -1);  // Get the number
-      verticies->at(i - 1) = value;
-    }
-
-    lua_pop(L, 1);  // Pop the value off the stack after using it
+int Window::LuaCall(lua_State* L) {
+  int argc = lua_gettop(L);
+  if (lua_istable(L, 1)) {
+    // metatable indexing
+  } else if (lua_isuserdata(L, 1)) {
+    // instance indexing
   }
 
-  auto indices = new std::vector<int>(nindices);
-  for (int i = 1; i <= nindices; ++i) {
-    lua_rawgeti(L, 3, i);
-    if (lua_isinteger(L, -1)) {
-      int value = lua_tointeger(L, -1);
-      indices->at(i - 1) = value;
-    }
-    lua_pop(L, 1);
+  // only use string index now
+  if (!lua_isstring(L, 2)) {
+    std::cout << "only string index implemented" << std::endl;
+    return 0;
   }
 
-  auto rc = new RenderContext(shader, *verticies, *indices);
-  auto udata = (RenderContext**)lua_newuserdata(L, sizeof(RenderContext*));
-  *udata = rc;
-  return 1;
-}
+  auto key = lua_tostring(L, 2);
+  if (strcmp(key, "new") == 0) {
+    auto f = [](lua_State* L) -> int {
+      auto w = luaL_checknumber(L, 1);
+      auto h = luaL_checknumber(L, 2);
+      auto udata = (Window**)lua_newuserdata(L, sizeof(Window*));
+      *udata = new Window(w, h);
+      luaL_setmetatable(L, "luaglWindow");
+      return 1;
+    };
+    lua_pushcfunction(L, f);
+    return 1;
+  }
 
-int ShowWindow(lua_State* L) {
-  auto win = *(Window**)lua_touserdata(L, 1);
-  auto rc = *(RenderContext**)lua_touserdata(L, 2);
-  (*win).GetRenderer().Add(rc);
-  (*win).Show();
+  if (strcmp(key, "show") == 0) {
+    auto show = [](lua_State* L) -> int {
+      auto win = *(Window**)lua_touserdata(L, 1);
+      auto rc = *(RenderContext**)lua_touserdata(L, 2);
+      (*win).GetRenderer().Add(rc);
+      (*win).Show();
+      return 0;
+    };
+    lua_pushcfunction(L, show);
+    return 1;
+  }
+
+  if (strcmp(key, "close") == 0) {
+    auto show = [](lua_State* L) -> int {
+      auto win = *(Window**)lua_touserdata(L, 1);
+      delete win;
+      std::cout << "window terminated" << std::endl;
+      return 0;
+    };
+    lua_pushcfunction(L, show);
+    return 1;
+  }
+
   return 0;
-}
-
-int DeleteWindow(lua_State* L) {
-  auto win = *(Window**)lua_touserdata(L, 1);
-  delete win;
-  return 0;
-}
-
-// clang-format off
-// lib functions
-static const luaL_Reg funcs[] = {
-    {"deletewindow", DeleteWindow}, 
-    {"newrendercontext", NewRenderContext}, 
-    {"newshader", NewShader}, 
-    {"showwindow", ShowWindow}, 
-    {NULL, NULL}
-};
-// clang-format on
-
-int OpenInit(lua_State* L) {
-  luaL_newlib(L, funcs);  // new table with functions
-  return 1;
 }
 
 }  // namespace Luagl

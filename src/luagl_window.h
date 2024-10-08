@@ -2,13 +2,13 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "luagl_render.h"
+#include "macros.h"
+
 extern "C" {
 #include <lua.h>
 }
 
 namespace Luagl {
-
-int OpenInit(lua_State* L);
 
 class Window {
  public:
@@ -16,9 +16,9 @@ class Window {
   void Show();
   virtual void OnUpdate();
   Renderer& GetRenderer();
-  static int LuaCall(lua_State* L);
-  static int LuaCtor(lua_State* L);
   ~Window();
+
+  LUACLASS
 
  private:
   int m_width;

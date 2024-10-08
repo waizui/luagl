@@ -1,4 +1,5 @@
 local gl = require("luagl")
+
 print("starting...")
 
 local vert = [[
@@ -62,8 +63,8 @@ float SDF(vec3 pos)
 {
   // write some code to combine the signed distance fields above to design the object described in the README.md
   float d_cylinder0 = sdCappedCylinder(pos, len_cylinder, rad_cylinder);
-  float d_cylinder1 = sdCappedCylinder(pos.yzx, len_cylinder, rad_cylinder); 
-  float d_cylinder2 = sdCappedCylinder(pos.yxz, len_cylinder, rad_cylinder); 
+  float d_cylinder1 = sdCappedCylinder(pos.yzx, len_cylinder, rad_cylinder);
+  float d_cylinder2 = sdCappedCylinder(pos.yxz, len_cylinder, rad_cylinder);
 
   float d_cylinder = opUnion(opUnion(d_cylinder0, d_cylinder1),d_cylinder2);
 
@@ -88,7 +89,7 @@ vec3 SDF_color(vec3 pos)
   if(abs(d_box)<THRESHOLD){
     return vec3(1,0,0);
   }
-    
+
   if(abs(d_sphere)<THRESHOLD){
     return vec3(0,0,1);
   }
@@ -138,9 +139,6 @@ void main()
 }
 ]]
 
-local win = gl.newwindow(800, 600)
-local shader = gl.newshader(vert, frag)
-
 -- stylua: ignore
 local vertices = {
   1, 1, 0.0,
@@ -155,9 +153,12 @@ local indices = {
   1, 2, 3
 }
 
-local rc = gl.newrendercontext(shader, vertices, indices)
+-- window need to be initialized first
+local win = gl.Window.new(800, 500)
 
-gl.showwindow(win, rc)
-gl.deletewindow(win)
+local shader = gl.Shader.new(vert, frag)
 
-print("test passed")
+local rc = gl.RenderContext.new(shader, vertices, indices)
+
+win:show(rc)
+win:close()
