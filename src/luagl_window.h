@@ -1,5 +1,5 @@
 #pragma once
-#include <glad/glad.h>  // need load glad firstly then glfw
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "luagl_render.h"
 extern "C" {
@@ -16,6 +16,8 @@ class Window {
   void Show();
   virtual void OnUpdate();
   Renderer& GetRenderer();
+  static int LuaCall(lua_State* L);
+  static int LuaCtor(lua_State* L);
   ~Window();
 
  private:

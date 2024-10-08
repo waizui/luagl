@@ -3,7 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <stdlib.h>
-#include "luagl_init.h"
+#include "luagl_window.h"
 #include "luagl_render.h"
 #include "luagl_shader.h"
 
@@ -102,20 +102,25 @@ Window::~Window() {
   glfwTerminate();
 }
 
+int Window::LuaCall(lua_State *L){
+  std::cout << "not implement in wind";
+  return 0;
+}
+
+int Window::LuaCtor(lua_State *L){
+  auto w = luaL_checknumber(L, 1);
+  auto h = luaL_checknumber(L, 2);
+  auto udata = (Window**)lua_newuserdata(L, sizeof(Window*));
+  *udata = new Window(w, h);
+  return 1;
+};
+
 int NewShader(lua_State* L) {
   auto vert = luaL_checkstring(L, 1);
   auto frag = luaL_checkstring(L, 2);
   auto shader = new Shader(vert, frag);
   auto udata = (Shader**)lua_newuserdata(L, sizeof(Shader*));
   *udata = shader;
-  return 1;
-}
-
-int NewWindow(lua_State* L) {
-  auto w = luaL_checknumber(L, 1);
-  auto h = luaL_checknumber(L, 2);
-  auto udata = (Window**)lua_newuserdata(L, sizeof(Window*));
-  *udata = new Window(w, h);
   return 1;
 }
 
@@ -168,7 +173,6 @@ int DeleteWindow(lua_State* L) {
 // clang-format off
 // lib functions
 static const luaL_Reg funcs[] = {
-    {"newwindow", NewWindow}, 
     {"deletewindow", DeleteWindow}, 
     {"newrendercontext", NewRenderContext}, 
     {"newshader", NewShader}, 

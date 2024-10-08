@@ -31,7 +31,7 @@ target_include_directories(${LUA_LIB} PUBLIC libs/lua)
 set(SOURCES
     src/main.cpp 
     src/luagl.cpp
-    src/luagl_init.cpp
+    src/luagl_window.cpp
     src/luagl_shader.cpp
     src/luagl_render.cpp
 )
