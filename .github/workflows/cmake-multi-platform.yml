@@ -15,14 +15,11 @@ jobs:
       matrix:
         os: [windows-latest]
         build_type: [Release]
-        c_compiler: [gcc, clang]
+        c_compiler: [clang]
         include:
           - os: windows-latest
             c_compiler: clang
             cpp_compiler: clang++
-        exclude:
-          - os: windows-latest
-            c_compiler: gcc
 
     steps:
       - name: Checkout code
