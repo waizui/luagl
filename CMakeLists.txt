@@ -21,6 +21,11 @@ file(GLOB LUA_SOURCES
     libs/lua/*.c
 )
 
+# for MinGW avoiding multiple main function
+list(FILTER LUA_SOURCES EXCLUDE REGEX ".*lua\\.c$")
+list(FILTER LUA_SOURCES EXCLUDE REGEX ".*luac\\.c$")
+list(FILTER LUA_SOURCES EXCLUDE REGEX ".*onelua\\.c$")
+
 # Create a static library for Lua
 add_library(${LUA_LIB} STATIC ${LUA_SOURCES})
 target_include_directories(${LUA_LIB} PUBLIC libs/lua)

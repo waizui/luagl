@@ -50,7 +50,7 @@ mkdir build
 
 cd ./build/
 
-# if on windows, I recommand use Ninja: cmake -G "Ninja" ..
+# if on windows, I recommand use Ninja with clang: cmake -G "Ninja" ..
 cmake ..
 
 # after this you will get a luagl executable, this is the Lua interpreter
@@ -59,4 +59,4 @@ cmake --build .
 ```
 ## Tips
 
-If you don't want to build it by yourself, pre-built executables are under bins folder.
+If you don't want to build it by yourself, pre-built executables are under [Releases](https://github.com/waizui/luagl/releases).
