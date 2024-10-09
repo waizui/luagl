@@ -19,7 +19,6 @@ set(LUA_LIB lua_static)
 # find all .c files in the lua/src directory
 file(GLOB LUA_SOURCES
     libs/lua/*.c
-    !libs/lua/lua.c
 )
 
 # Create a static library for Lua
