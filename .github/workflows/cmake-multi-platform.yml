@@ -22,7 +22,7 @@ jobs:
           submodules: true
 
       - name: Set up CMake
-        uses: lukka/get-cmake@v2.0.2  # Use the latest available version
+        uses: lukka/get-cmake@latest  # Use the latest available version
 
       - name: Install Dependencies on macOS
         if: matrix.os == 'macos-latest'
