@@ -2,7 +2,7 @@
 
 ## Description
 
-Luagl is a Lua module for calling OpenGL easily. Original build for [luacg](https://github.com/waizui/luacg).
+Luagl is a Lua module for calling OpenGL easily. Originally built for [luacg](https://github.com/waizui/luacg).
 
 
 ```Lua
