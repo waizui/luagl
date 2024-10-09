@@ -1,4 +1,4 @@
-name: Build and place executable in bins/
+name: Build and place executable in bins
 
 on:
   push:
