@@ -3,10 +3,10 @@ name: Build and place executable in bins/
 on:
   push:
     branches:
-      - main
+      - master
   pull_request:
     branches:
-      - main
+      - master
 
 jobs:
   build:
@@ -16,53 +16,42 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
 
     steps:
-      # Step 1: Checkout the repository, including submodules (GLFW)
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           submodules: true
 
-      # Step 2: Set up CMake
       - name: Set up CMake
         uses: lukka/get-cmake@v3
 
-      # Step 3: Install Dependencies (per platform)
-      
-      # macOS-specific steps
       - name: Install Dependencies on macOS
         if: matrix.os == 'macos-latest'
         run: |
           brew update
           brew install cmake
 
-      # Ubuntu-specific steps
       - name: Install Dependencies on Ubuntu
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt update
           sudo apt install -y build-essential cmake libglew-dev mesa-common-dev
 
-      # Windows-specific steps
       - name: Install Dependencies on Windows
         if: matrix.os == 'windows-latest'
         run: |
           choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
           choco install make
 
-      # Step 4: Create Build Directory
       - name: Create Build Directory
         run: mkdir -p build
 
-      # Step 5: Configure CMake to build into bins/ directory, using GLFW submodule
       - name: Configure CMake
         run: |
           cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=${{ github.workspace }}/bins
 
-      # Step 6: Build the Project
       - name: Build
         run: cmake --build build
 
-      # Step 7: Upload the executable to GitHub Actions as an artifact
       - name: Upload Executable
         uses: actions/upload-artifact@v3
         with:
