@@ -1,5 +1,6 @@
 #include <glad/glad.h>  // need load glad firstly then glfw
 #include <GLFW/glfw3.h>
+#include <cstring>
 #include <vector>
 #include "luagl_render.h"
 
