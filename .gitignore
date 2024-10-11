@@ -6,9 +6,7 @@
 *.lo
 *.o
 *.obj
-
-# Precompiled Headers
-*.gch
+# Precompiled Headers *.gch
 *.pch
 
 # Compiled Dynamic libraries
@@ -46,3 +44,5 @@ CMakeUserPresets.json
 build/
 .cache/
 compile_commands.json
+
+.DS_Store
