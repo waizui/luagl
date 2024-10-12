@@ -1,66 +1,66 @@
-name: Build and place executable in bins
-
-on:
-  push:
-    branches:
-      - master
-  pull_request:
-    branches:
-      - master
-
-jobs:
-  build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-22.04, macos-12]
-        build_type: [Release]
-        include:
-          - os: ubuntu-22.04
-            c_compiler: gcc
-            cpp_compiler: g++
-          - os: macos-12
-            c_compiler: clang
-            cpp_compiler: clang++
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          submodules: true
-
-      - name: Set up CMake
-        uses: lukka/get-cmake@latest
-
-      - name: Install Dependencies on Ubuntu
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y ninja-build libwayland-dev libxkbcommon-dev xorg-dev
-
-      - name: Install Dependencies on macOS
-        if: matrix.os == 'macos-latest'
-        run: |
-          brew install ninja
-
-      - name: Install Dependencies on Windows
-        if: matrix.os == 'windows-latest'
-        run: |
-          choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
-          choco install ninja
-
-      - name: Create Build Directory
-        run: mkdir -p build
-
-      - name: Configure CMake
-        run: |
-          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=${{ github.workspace }}/bins
-
-      - name: Build
-        run: cmake --build build
-
-      - name: Upload Executable
-        uses: actions/upload-artifact@v3
-        with:
-          name: built-executable-${{ matrix.os }}
-          path: bins/
+# name: Build and place executable in bins
+#
+# on:
+#   push:
+#     branches:
+#       - master
+#   pull_request:
+#     branches:
+#       - master
+#
+# jobs:
+#   build:
+#     runs-on: ${{ matrix.os }}
+#     strategy:
+#       matrix:
+#         os: [ubuntu-22.04, macos-12]
+#         build_type: [Release]
+#         include:
+#           - os: ubuntu-22.04
+#             c_compiler: gcc
+#             cpp_compiler: g++
+#           - os: macos-12
+#             c_compiler: clang
+#             cpp_compiler: clang++
+#
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v3
+#         with:
+#           submodules: true
+#
+#       - name: Set up CMake
+#         uses: lukka/get-cmake@latest
+#
+#       - name: Install Dependencies on Ubuntu
+#         if: matrix.os == 'ubuntu-latest'
+#         run: |
+#           sudo apt-get update
+#           sudo apt-get install -y ninja-build libwayland-dev libxkbcommon-dev xorg-dev
+#
+#       - name: Install Dependencies on macOS
+#         if: matrix.os == 'macos-latest'
+#         run: |
+#           brew install ninja
+#
+#       - name: Install Dependencies on Windows
+#         if: matrix.os == 'windows-latest'
+#         run: |
+#           choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
+#           choco install ninja
+#
+#       - name: Create Build Directory
+#         run: mkdir -p build
+#
+#       - name: Configure CMake
+#         run: |
+#           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=${{ github.workspace }}/bins
+#
+#       - name: Build
+#         run: cmake --build build
+#
+#       - name: Upload Executable
+#         uses: actions/upload-artifact@v3
+#         with:
+#           name: built-executable-${{ matrix.os }}
+#           path: bins/
