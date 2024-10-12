@@ -1,4 +1,4 @@
-name: Build Windows
+name: Build on Ubuntu
 
 on:
   push:
@@ -13,12 +13,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-2022]
+        os: [ubuntu-24.04]
         build_type: [Release]
         include:
-          - os: windows-2022
-            c_compiler: clang
-            cpp_compiler: clang++
+          - os: ubuntu-22.04
+            c_compiler: gcc
+            cpp_compiler: g++
 
     steps:
       - name: Checkout code
@@ -29,10 +29,10 @@ jobs:
       - name: Set up CMake
         uses: lukka/get-cmake@latest
 
-      - name: Install Dependencies 
+      - name: Install Dependencies on Ubuntu
         run: |
-          choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
-          choco install ninja
+          sudo apt-get update
+          sudo apt-get install -y ninja-build libwayland-dev libxkbcommon-dev xorg-dev
 
       - name: Create Build Directory
         run: mkdir -p build

@@ -1,4 +1,4 @@
-name: Build Windows
+name: Build On MacOS
 
 on:
   push:
@@ -13,10 +13,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-2022]
+        os: [macos-12]
         build_type: [Release]
         include:
-          - os: windows-2022
+          - os: macos-12
             c_compiler: clang
             cpp_compiler: clang++
 
@@ -31,8 +31,7 @@ jobs:
 
       - name: Install Dependencies 
         run: |
-          choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
-          choco install ninja
+          brew install ninja
 
       - name: Create Build Directory
         run: mkdir -p build
