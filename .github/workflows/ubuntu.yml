@@ -19,7 +19,7 @@ jobs:
           - os: ubuntu-24.04
             c_compiler: gcc
             cpp_compiler: g++
-          - os: ubuntu-22.04
+          - os: ubuntu-20.04
             c_compiler: gcc
             cpp_compiler: g++
 
@@ -36,13 +36,13 @@ jobs:
         if: matrix.os == 'ubuntu-24.04'
         run: |
           sudo apt-get update
-          sudo apt-get install -y ninja-build xorg-dev
+          sudo apt-get install -y ninja-build libwayland-dev libxkbcommon-dev xorg-dev
 
       - name: Install Dependencies on Ubuntu 20.04
         if: matrix.os == 'ubuntu-20.04'
         run: |
           sudo apt-get update
-          sudo apt-get install -y ninja-build libwayland-dev libxkbcommon-dev xorg-dev
+          sudo apt-get install -y ninja-build xorg-dev
 
 
       - name: Create Build Directory
