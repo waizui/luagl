@@ -14,6 +14,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS True)
 
 #set(CMAKE_BUILD_TYPE Release)
 
+message(STATUS "c compiler ${CMAKE_C_COMPILER}")
+
 # ------lua--------
 set(LUA_LIB lua_static)
 # find all .c files in the lua/src directory
