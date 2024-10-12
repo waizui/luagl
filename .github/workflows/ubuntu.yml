@@ -13,9 +13,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-24.04]
+        os: [ubuntu-24.04,ubuntu-20.04]
         build_type: [Release]
         include:
+          - os: ubuntu-24.04
+            c_compiler: gcc
+            cpp_compiler: g++
           - os: ubuntu-22.04
             c_compiler: gcc
             cpp_compiler: g++
@@ -29,17 +32,25 @@ jobs:
       - name: Set up CMake
         uses: lukka/get-cmake@latest
 
-      - name: Install Dependencies on Ubuntu
+      - name: Install Dependencies on Ubuntu 24.04
+        if: matrix.os == 'ubuntu-24.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build xorg-dev
+
+      - name: Install Dependencies on Ubuntu 20.04
+        if: matrix.os == 'ubuntu-20.04'
         run: |
           sudo apt-get update
           sudo apt-get install -y ninja-build libwayland-dev libxkbcommon-dev xorg-dev
+
 
       - name: Create Build Directory
         run: mkdir -p build
 
       - name: Configure CMake
         run: |
-          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=${{ github.workspace }}/bins
+           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=${{ github.workspace }}/bins ${{ matrix.os == 'ubuntu-24.04' && '-DGLFW_BUILD_WAYLAND=ON' || '-DGLFW_BUILD_WAYLAND=OFF' }}
 
       - name: Build
         run: cmake --build build
